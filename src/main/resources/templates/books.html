@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="ru">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <title th:text="#{title.books}">Book List</title>
+
+    <!-- Google Fonts (Roboto) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link
+            href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+            rel="stylesheet"
+    />
+
+    <!-- Общий CSS -->
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body style="background-color: var(--color-bg);">
+<!-- Обёртка, не жесткий flex-center, а обычный контейнер со свободными отступами -->
+<div class="library-container">
+    <!-- Заголовок -->
+    <h2 class="form-title" th:text="#{heading.bookList}">Book List</h2>
+
+    <!-- Переключатель языка (справа вверху) -->
+    <div style="margin-bottom: 1rem; text-align: right;">
+        <button type="button"
+                class="btn-lang"
+                th:onclick="|window.location='@{/books(lang='en')}'|">
+            EN
+        </button>
+        <button type="button"
+                class="btn-lang"
+                th:onclick="|window.location='@{/books(lang='ru')}'|">
+            RU
+        </button>
+    </div>
+
+    <!-- Кнопка «Add New Book» только для ADMIN или LIBRARIAN -->
+    <div sec:authorize="hasAnyAuthority('ADMIN','LIBRARIAN')" style="margin-bottom: 1.5rem;">
+        <a th:href="@{/admin/books/add}"
+           class="btn-primary"
+           th:text="#{button.addBook}">
+            ➕ Add New Book
+        </a>
+    </div>
+
+    <!-- Таблица с книгами -->
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th th:text="#{label.title}">Title</th>
+                <th th:text="#{label.author}">Author</th>
+                <th th:text="#{label.genre}">Genre</th>
+                <th th:text="#{label.year}">Year</th>
+                <th th:text="#{label.quantity}">Quantity</th>
+                <th th:text="#{label.description}">Description</th>
+                <th th:text="#{label.action}">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+                <tr th:each="book : ${booksPage.content}">
+                <td th:text="${book.title}">Book Title</td>
+                <td th:text="${book.author.name}">Author Name</td>
+                <td>
+                     <span th:each="g, stat : ${book.genres}">
+                         <span th:text="${g.name}">Genre Name</span>
+                         <span th:if="${!stat.last}">, </span>
+                     </span>
+                </td>
+                <td th:text="${book.year}">2025</td>
+                <td th:text="${book.quantity}">10</td>
+                <td th:text="${book.description}">Description</td>
+                <td>
+                    <!-- формы -->
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div class="pagination">
+            <a th:if="${booksPage.hasPrevious()}"
+               th:href="@{/books(page=${booksPage.number-1},size=${booksPage.size})}">Prev</a>
+            <span th:text="${booksPage.number+1} + '/' + ${booksPage.totalPages}"></span>
+            <a th:if="${booksPage.hasNext()}"
+               th:href="@{/books(page=${booksPage.number+1},size=${booksPage.size})}">Next</a>
+        </div>
+    </div>
+
+    <!-- Ссылка «← Back to Home» -->
+    <a th:href="@{/home}" class="btn-link" th:text="#{link.backToHome}">
+        ← Back to Home
+    </a>
+</div>
+</body>
+</html>
